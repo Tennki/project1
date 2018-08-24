@@ -12,4 +12,6 @@ python manage.py db upgrade
 python manage.py runserver
 
 
-export DATABASE_URL='postgresql://sa:P@ssw0rd@localhost/project1'
+
+
+
