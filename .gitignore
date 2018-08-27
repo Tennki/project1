@@ -19,5 +19,8 @@ local/*
 include/
 include/*
 
-venv/
+.env/
+.env/*
+
+*.db
 

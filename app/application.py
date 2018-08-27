@@ -73,18 +73,7 @@ def login():
         return render_template("error.html", message="Incorrect password!")
         
     
-    
-    #Check passwords match
-    if password != pass_confirm:
-        return render_template("error.html", message="Passwords not match! Please try again.")
-    
-    #Check is login already exists 
-    if db.execute("SELECT * FROM users WHERE login = :login", {"login": login}).rowcount == 1:
-        return render_template("error.html", message="Login already exists!")
-    db.execute("INSERT INTO users (name, login, password) VALUES (:name, :login,:password)",
-            {"name": name, "login": login, "password":password})
-    db.commit()
-    return render_template("success.html", message="Registration successfuly!")
+    return render_template("success.html", message="Welcome,")
 
 
 
