@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 app = Flask(__name__)
+app.config['DEBUG'] = True
 
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
