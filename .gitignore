@@ -24,3 +24,8 @@ include/*
 
 *.db
 
+flask_sessions/
+flask_sessions/*
+
+application/flask_sessions/
+application/flask_sessions/*
