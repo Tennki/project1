@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, render_template
+from flask import Flask, session, render_template, request
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -27,54 +27,64 @@ def index():
     books = db.execute("SELECT * FROM books LIMIT 10").fetchall()
     return render_template("index.html", books=books)
 
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    """User registration"""
+      
+    if request.method == "POST":
 
-    # Get form information.
-    name = request.form.get("name")
-    login = request.form.get("login")
-    password = request.form.get("password")
-    pass_confirm = request.form.get("pass_confirm")
-    
-    #Check passwords match
-    if password != pass_confirm:
-        return render_template("error.html", message="Passwords not match! Please try again.")
-    
-    #Check is login already exists 
-    if db.execute("SELECT * FROM users WHERE login = :login", {"login": login}).rowcount == 1:
-        return render_template("error.html", message="Login already exists!")
-    db.execute("INSERT INTO users (name, login, password) VALUES (:name, :login,:password)",
-            {"name": name, "login": login, "password":password})
-    db.commit()
-    return render_template("success.html", message="Registration successfuly!")
+        """User registration"""
 
-@app.route("/login", methods=["POST"])
+        # Get form information.
+        name = request.form.get("name")
+        login = request.form.get("login")
+        password = request.form.get("password")
+        pass_confirm = request.form.get("pass_confirm")
+
+        #Check passwords match
+        if password != pass_confirm:
+            return render_template("error.html", message="Passwords not match!  Please try again.")
+
+        #Check is login already exists 
+        if db.execute("SELECT * FROM users WHERE login = :login", {"login":     login}).rowcount == 1:
+            return render_template("error.html", message="Login already     exists!")
+        db.execute("INSERT INTO users (name, login, password) VALUES (:name,    :login,:password)",
+                    {"name": name, "login": login, "password":password})
+        db.commit()
+        return render_template("success.html", message="Registration    successfuly!")
+    
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    """User login"""
-
-    # Get form information.
-
-    login = request.form.get("login")
-    password = request.form.get("password")
     
-    # Check login and pass not null
-    if len(login) == 0 and len(password) == 0:
-        return render_template("error.html", message="Login or password could not be empty!")
-
-    user = db.execute("SELECT login, password FROM users WHERE login = :login",
-                        {"login": login}).fetchone()
     
-    #Check is login exists
-    if user is None:
-        return render_template("error.html", message="User does not exist!")
+    if request.method == "POST":
+        """User login"""
 
-    #Check password 
-    if password != user.password:
-        return render_template("error.html", message="Incorrect password!")
-        
+        # Get form information.
+
+        login = request.form.get("login")
+        password = request.form.get("password")
+
+        # Check login and pass not null
+        if len(login) == 0 and len(password) == 0:
+            return render_template("error.html", message="Login or password could not be empty!")
+
+        user = db.execute("SELECT login, password FROM users WHERE login = :login",
+                            {"login": login}).fetchone()
+
+        #Check is login exists
+        if user is None:
+            return render_template("error.html", message="User does not exist!")
+
+        #Check password 
+        if password != user.password:
+            return render_template("error.html", message="Incorrect password!")
+
+
+        return render_template("success.html", message="Welcome,")
     
-    return render_template("success.html", message="Welcome,")
+    return render_template("login.html")
 
 
 
