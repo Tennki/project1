@@ -5,18 +5,25 @@
 {% endblock %}
 
 {% block body %}
+
+    {%if user%}
+        <h3>Welcome, {{ user.name }}</h3>
+    {%endif%}
+    
     <h1>Top 10 Books:</h1>
 
     <ul>
         {% for book in books %}
             <li>
-                <a href="{{ url_for('book', book_id=book.id) }}">
+                <a href="{{ url_for('book', book_id=book.book_id) }}">
                     {{ book.isbn }}  {{ book.title }}  {{ book.author }} {{ book.year }}
                 </a>
             </li>
         {% endfor %}
     </ul>
-    <a href="{{ url_for('login') }}">Login</a>
-    <a href="{{ url_for('register') }}">Register</a>
+    
+        <a class="button" href="{{ url_for('login') }}">Login</a>
+        <a class="button" href="{{ url_for('register') }}">Register</a>
+    
 
 {% endblock %}

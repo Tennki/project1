@@ -25,7 +25,18 @@ db = scoped_session(sessionmaker(bind=engine))
 @app.route("/")
 def index():
     books = db.execute("SELECT * FROM books LIMIT 10").fetchall()
-    return render_template("index.html", books=books)
+    
+    user_id = session.get('user_id')
+        if user_id:
+            user = db.execute("SELECT name FROM users WHERE user_id = :id", {"id": user_id}).fetchone()
+            if user:
+                # Success!
+                return render_template("index.html", books=books, user=user)
+            else:
+                return render_template("index.html", books=books)
+        
+
+    #return render_template("index.html", books=books, user=user)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -56,8 +67,7 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    
-    
+        
     if request.method == "POST":
         """User login"""
 
@@ -86,43 +96,19 @@ def login():
     
     return render_template("login.html")
 
-
-
-@app.route("/book", methods=["POST"])
-def book():
-    """Book a flight."""
-
-    # Get form information.
-    name = request.form.get("name")
-    try:
-        flight_id = int(request.form.get("flight_id"))
-    except ValueError:
-        return render_template("error.html", message="Invalid flight number.")
+@app.route("/book/<int:book_id>")
+def book(book_id):
+    """Lists details about a single book."""
 
     # Make sure flight exists.
-    if db.execute("SELECT * FROM flights WHERE id = :id", {"id": flight_id}).rowcount == 0:
-        return render_template("error.html", message="No such flight with that id.")
-    db.execute("INSERT INTO passengers (name, flight_id) VALUES (:name, :flight_id)",
-            {"name": name, "flight_id": flight_id})
-    db.commit()
-    return render_template("success.html")
+    book = db.execute("SELECT * FROM books WHERE book_id = :id", {"id": book_id}).fetchone()
+    if book is None:
+        return render_template("error.html", message="No such book.")
 
-@app.route("/flights")
-def flights():
-    """Lists all flights."""
-    flights = db.execute("SELECT * FROM flights").fetchall()
-    return render_template("flights.html", flights=flights)
+    # Get all info.
+    reviews = db.execute("SELECT review FROM reviews WHERE book_id = :book_id",{"book_id": book_id}).fetchall()
+    return render_template("book.html", book=book, reviews=reviews)
 
-@app.route("/flights/<int:flight_id>")
-def flight(flight_id):
-    """Lists details about a single flight."""
 
-    # Make sure flight exists.
-    flight = db.execute("SELECT * FROM flights WHERE id = :id", {"id": flight_id}).fetchone()
-    if flight is None:
-        return render_template("error.html", message="No such flight.")
 
-    # Get all passengers.
-    passengers = db.execute("SELECT name FROM passengers WHERE flight_id = :flight_id",
-                            {"flight_id": flight_id}).fetchall()
-    return render_template("flight.html", flight=flight, passengers=passengers)
+
